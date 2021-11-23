@@ -1,5 +1,7 @@
 # Question And Answer
 
+This is an exercise. This is a backend side of a system called QuestionsAndAnswers. It is similar to Quora/Stackoverflow and others with 1 major difference. It only allow 1 answer per question. If someone thinks they have a better answer, they will have to update the existing answer for that particular question instead of adding another answer.
+
 ## Install
 ```sh
 docker-compose up -d
