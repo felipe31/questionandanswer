@@ -80,7 +80,7 @@ GET /user/{id-username}/questions
 GET /users
 ```
 ## Testing
-This API can be tested automatically using `go test` or manually, by using the "Go QuestionAndAnswer.com.postman_collection.json" file.
+This API can be tested automatically using `go test` or manually, by using the [Postman](https://github.com/Felipe31/questionandanswer/blob/main/Go%20QuestionAndAnswer.com.postman_collection.json) file.
 
 ## Things to add
 - Get answers by user: this feature could help checking who is more active in the community
