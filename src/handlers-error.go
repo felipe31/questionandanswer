@@ -13,5 +13,4 @@ type QnAError struct {
 func WriteError(w http.ResponseWriter, status int, text, message string) {
 	w.WriteHeader(http.StatusConflict)
 	json.NewEncoder(w).Encode(QnAError{text, message})
-	return
 }

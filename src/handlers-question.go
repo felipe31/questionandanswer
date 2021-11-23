@@ -105,7 +105,7 @@ func HandleDeleteQuestion(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		err = RemoveAnswer(int(answer.ID))
 		if err != nil {
-			WriteError(w, http.StatusInternalServerError, "Error while removing question!", err.Error())
+			WriteError(w, http.StatusInternalServerError, "Error while removing question's answer!", err.Error())
 			return
 		}
 	}

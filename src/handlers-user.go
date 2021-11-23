@@ -84,7 +84,6 @@ func HandleGetUser(w http.ResponseWriter, r *http.Request) {
 			WriteError(w, http.StatusNotFound, "User not found!", err.Error())
 			return
 		}
-		userId = int(user.ID)
 	} else {
 		user, err = UserByID(userId)
 		if err != nil {

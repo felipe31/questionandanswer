@@ -10,7 +10,7 @@ import (
 func main() {
 	router := mux.NewRouter()
 
-	err := MysqlConnect()
+	err := MysqlConnect("mysql")
 	if err != nil {
 		fmt.Printf("Error while connecting to the database!\n%v\n", err)
 		return
@@ -42,7 +42,5 @@ func main() {
 func notFound(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("notFound")
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusNotFound)
-	w.Write([]byte(`{"error": "Page not found!"}`))
-
+	WriteError(w, http.StatusNotFound, "Page not found!", r.URL.Path)
 }

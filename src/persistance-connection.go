@@ -9,14 +9,14 @@ import (
 
 var db *sql.DB
 
-func MysqlConnect() error {
+func MysqlConnect(host string) error {
 	cfg := mysql.Config{
 		User:                 "root",
 		Passwd:               "123456123456",
 		Net:                  "tcp",
 		DBName:               "questionandanswer",
 		AllowNativePasswords: true,
-		Addr:                 "mysql:3306",
+		Addr:                 host + ":3306",
 	}
 
 	var err error
