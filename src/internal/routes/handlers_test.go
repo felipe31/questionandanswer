@@ -1,18 +1,18 @@
-package main
+package routes
 
 import (
+	"felipesoares/questionandanswer/internal/model"
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/assert"
 )
 
 // I was not able to figure how to test POST methods
 func TestHandleGetAllUsers(t *testing.T) {
 	t.Parallel()
-	MysqlConnect(testingHost)
+	model.MysqlConnect("127.0.0.1")
 	assert := assert.New(t)
 
 	r, _ := http.NewRequest("GET", "/", nil)

@@ -1,7 +1,8 @@
-package main
+package routes
 
 import (
 	"encoding/json"
+	"felipesoares/questionandanswer/internal/model"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 
 func HandleNewQuestion(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("HandleNewQuestion")
-	var newQuestion Question
+	var newQuestion model.Question
 
 	reqBody, err := ioutil.ReadAll(r.Body)
 
@@ -23,13 +24,13 @@ func HandleNewQuestion(w http.ResponseWriter, r *http.Request) {
 	}
 	json.Unmarshal(reqBody, &newQuestion)
 
-	_, err = QuestionByTitle(newQuestion.Title)
+	_, err = model.QuestionByTitle(newQuestion.Title)
 	if err == nil {
 		WriteError(w, http.StatusConflict, "Title already registered", "")
 		return
 	}
 
-	newQuestion.ID, err = AddQuestion(newQuestion)
+	newQuestion.ID, err = model.AddQuestion(newQuestion)
 	if err != nil {
 		WriteError(w, http.StatusInternalServerError, "Error while creating question! ", err.Error())
 		return
@@ -41,7 +42,7 @@ func HandleNewQuestion(w http.ResponseWriter, r *http.Request) {
 
 func HandleUpdateQuestion(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("HandleUpdateQuestion")
-	var updatedQuestion Question
+	var updatedQuestion model.Question
 
 	w.Header().Set("Content-Type", "application/json")
 	reqBody, err := ioutil.ReadAll(r.Body)
@@ -61,16 +62,16 @@ func HandleUpdateQuestion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = QuestionByTitle(updatedQuestion.Title)
+	_, err = model.QuestionByTitle(updatedQuestion.Title)
 	if err != nil {
-		_, err = QuestionById(int(updatedQuestion.ID))
+		_, err = model.QuestionById(int(updatedQuestion.ID))
 		if err != nil {
 			WriteError(w, http.StatusConflict, "Question not found!", err.Error())
 			return
 		}
 	}
 
-	err = UpdateQuestion(updatedQuestion)
+	err = model.UpdateQuestion(updatedQuestion)
 	if err != nil {
 		WriteError(w, http.StatusInternalServerError, "Error while updating question! ", err.Error())
 		return
@@ -91,19 +92,19 @@ func HandleDeleteQuestion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	question, err := QuestionById(questionId)
+	question, err := model.QuestionById(questionId)
 	if err != nil {
 		WriteError(w, http.StatusNotFound, "Question to be deleted not found!", err.Error())
 		return
 	}
-	err = RemoveQuestion(questionId)
+	err = model.RemoveQuestion(questionId)
 	if err != nil {
 		WriteError(w, http.StatusInternalServerError, "Error while removing question!", err.Error())
 		return
 	}
-	answer, err := AnswerByQuestionId(questionId)
+	answer, err := model.AnswerByQuestionId(questionId)
 	if err == nil {
-		err = RemoveAnswer(int(answer.ID))
+		err = model.RemoveAnswer(int(answer.ID))
 		if err != nil {
 			WriteError(w, http.StatusInternalServerError, "Error while removing question's answer!", err.Error())
 			return
@@ -122,31 +123,31 @@ func HandleGetQuestionAndAnswer(w http.ResponseWriter, r *http.Request) {
 		WriteError(w, http.StatusBadGateway, "Invalid question id!", err.Error())
 		return
 	}
-	question, err := QuestionById(questionId)
+	question, err := model.QuestionById(questionId)
 	if err != nil {
 		WriteError(w, http.StatusNotFound, "Question not found!", err.Error())
 		return
 	}
 
-	answer, err := AnswerByQuestionId(questionId)
+	answer, err := model.AnswerByQuestionId(questionId)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 
-	json.NewEncoder(w).Encode(QnA{question, answer})
+	json.NewEncoder(w).Encode(model.QnA{question, answer})
 
 }
 
 func HandleGetAllQuestions(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("HandleGetAllQuestions")
 	w.Header().Set("Content-Type", "application/json")
-	questions, err := GetAllQuestions()
+	questions, err := model.GetAllQuestions()
 	if err != nil {
 		WriteError(w, http.StatusNotFound, "Error while retrieving questions!", err.Error())
 		return
 	}
 	if questions == nil {
-		json.NewEncoder(w).Encode([]Question{})
+		json.NewEncoder(w).Encode([]model.Question{})
 		return
 	}
 

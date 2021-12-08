@@ -1,18 +1,18 @@
-package main
+package routes
 
 import (
 	"encoding/json"
+	"felipesoares/questionandanswer/internal/model"
 	"fmt"
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 func HandleNewUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("HandleNewUser")
-	var newUser User
+	var newUser model.User
 
 	reqBody, err := ioutil.ReadAll(r.Body)
 
@@ -23,13 +23,13 @@ func HandleNewUser(w http.ResponseWriter, r *http.Request) {
 	}
 	json.Unmarshal(reqBody, &newUser)
 
-	_, err = UserByUsername(newUser.Username)
+	_, err = model.UserByUsername(newUser.Username)
 	if err == nil {
 		WriteError(w, http.StatusConflict, "Username already registered", "")
 		return
 	}
 
-	newUser.ID, err = AddUser(newUser)
+	newUser.ID, err = model.AddUser(newUser)
 	if err != nil {
 		WriteError(w, http.StatusInternalServerError, "Error while creating user! ", err.Error())
 		return
@@ -42,26 +42,26 @@ func HandleNewUser(w http.ResponseWriter, r *http.Request) {
 // Note: Deleting a user does not delete its questions
 func HandleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("HandleDeleteUser")
-	var user User
+	var user model.User
 	userIdVar := mux.Vars(r)["id-username"]
 	w.Header().Set("Content-Type", "application/json")
 	userId, err := strconv.Atoi(userIdVar)
 	if err != nil {
 		// Check if the username is in the URL instead of the ID
-		user, err = UserByUsername(userIdVar)
+		user, err = model.UserByUsername(userIdVar)
 		if err != nil {
 			WriteError(w, http.StatusNotFound, "User to be deleted not found!", err.Error())
 			return
 		}
 		userId = int(user.ID)
 	} else {
-		user, err = UserByID(userId)
+		user, err = model.UserByID(userId)
 		if err != nil {
 			WriteError(w, http.StatusNotFound, "User to be deleted not found!", err.Error())
 			return
 		}
 	}
-	err = RemoveUser(userId)
+	err = model.RemoveUser(userId)
 	if err != nil {
 		WriteError(w, http.StatusInternalServerError, "Error while removing user!", err.Error())
 		return
@@ -73,19 +73,19 @@ func HandleDeleteUser(w http.ResponseWriter, r *http.Request) {
 
 func HandleGetUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("HandleGetUser")
-	var user User
+	var user model.User
 	userIdVar := mux.Vars(r)["id-username"]
 	w.Header().Set("Content-Type", "application/json")
 	userId, err := strconv.Atoi(userIdVar)
 	if err != nil {
 		// Check if the username is in the URL instead of the ID
-		user, err = UserByUsername(userIdVar)
+		user, err = model.UserByUsername(userIdVar)
 		if err != nil {
 			WriteError(w, http.StatusNotFound, "User not found!", err.Error())
 			return
 		}
 	} else {
-		user, err = UserByID(userId)
+		user, err = model.UserByID(userId)
 		if err != nil {
 			WriteError(w, http.StatusNotFound, "User not found!", err.Error())
 			return
@@ -104,27 +104,27 @@ func HandleGetUserQuestions(w http.ResponseWriter, r *http.Request) {
 	userId, err := strconv.Atoi(userIdVar)
 	if err != nil {
 		// Check if the username is in the URL instead of the ID
-		user, err := UserByUsername(userIdVar)
+		user, err := model.UserByUsername(userIdVar)
 		if err != nil {
 			WriteError(w, http.StatusBadGateway, "Invalid username!", err.Error())
 			return
 		}
 		userId = int(user.ID)
 	}
-	_, err = UserByID(userId)
+	_, err = model.UserByID(userId)
 	if err != nil {
 		WriteError(w, http.StatusBadGateway, "Invalid id!", err.Error())
 		return
 	}
 
-	questions, err := QuestionsByUserId(userId)
+	questions, err := model.QuestionsByUserId(userId)
 	if err != nil {
 		WriteError(w, http.StatusNotFound, "Error while retrieving questions of a user!", err.Error())
 		return
 	}
 
 	if questions == nil {
-		json.NewEncoder(w).Encode([]Question{})
+		json.NewEncoder(w).Encode([]model.Question{})
 		return
 	}
 
@@ -134,13 +134,13 @@ func HandleGetUserQuestions(w http.ResponseWriter, r *http.Request) {
 func HandleGetAllUsers(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("HandleGetAllUsers")
 	w.Header().Set("Content-Type", "application/json")
-	users, err := GetAllUsers()
+	users, err := model.GetAllUsers()
 	if err != nil {
 		WriteError(w, http.StatusNotFound, "Error while retrieving users!", err.Error())
 		return
 	}
 	if users == nil {
-		json.NewEncoder(w).Encode([]User{})
+		json.NewEncoder(w).Encode([]model.User{})
 		return
 	}
 

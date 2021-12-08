@@ -1,20 +1,20 @@
-package main
+package routes
 
 import (
 	"encoding/json"
+	"felipesoares/questionandanswer/internal/model"
 	"fmt"
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 // Answer related handlers
 func HandleNewAnswer(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("HandleNewAnswer")
 
-	var newAnswer Answer
+	var newAnswer model.Answer
 
 	reqBody, err := ioutil.ReadAll(r.Body)
 
@@ -24,18 +24,18 @@ func HandleNewAnswer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.Unmarshal(reqBody, &newAnswer)
-	_, err = QuestionById(int(newAnswer.QuestionId))
+	_, err = model.QuestionById(int(newAnswer.QuestionId))
 	if err != nil {
 		WriteError(w, http.StatusNotFound, "Question not found.", err.Error())
 		return
 	}
-	_, err = AnswerByQuestionId(int(newAnswer.QuestionId))
+	_, err = model.AnswerByQuestionId(int(newAnswer.QuestionId))
 	if err == nil {
 		WriteError(w, http.StatusConflict, "This question already has an answer. Try updating it.", "")
 		return
 	}
 
-	newAnswer.ID, err = AddAnswer(newAnswer)
+	newAnswer.ID, err = model.AddAnswer(newAnswer)
 	if err != nil {
 		WriteError(w, http.StatusInternalServerError, "Error while creating answer! ", err.Error())
 		return
@@ -47,7 +47,7 @@ func HandleNewAnswer(w http.ResponseWriter, r *http.Request) {
 
 func HandleUpdateAnswer(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("HandleUpdateAnswer")
-	var updatedAnswer Answer
+	var updatedAnswer model.Answer
 
 	w.Header().Set("Content-Type", "application/json")
 	reqBody, err := ioutil.ReadAll(r.Body)
@@ -67,17 +67,17 @@ func HandleUpdateAnswer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = QuestionById(int(updatedAnswer.QuestionId))
+	_, err = model.QuestionById(int(updatedAnswer.QuestionId))
 	if err != nil {
 		WriteError(w, http.StatusConflict, "Question not found!", err.Error())
 		return
 	}
-	_, err = AnswerByQuestionId(int(updatedAnswer.QuestionId))
+	_, err = model.AnswerByQuestionId(int(updatedAnswer.QuestionId))
 	if err != nil {
 		WriteError(w, http.StatusConflict, "Answer not found!", err.Error())
 		return
 	}
-	err = UpdateAnswer(updatedAnswer)
+	err = model.UpdateAnswer(updatedAnswer)
 	if err != nil {
 		WriteError(w, http.StatusInternalServerError, "Error while updating answer! ", err.Error())
 		return
